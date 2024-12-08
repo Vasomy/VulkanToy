@@ -5,16 +5,16 @@ namespace JRender
 
 
 	RawMesh::RawMesh(int inVertexCount,int inIndexCount,
-		const vertex_data_type* verticesData, const index_data_type* indicesData)
+		const Vertex* verticesData, const Index* indicesData)
 		:vertexCount(inVertexCount),indexCount(inIndexCount)
 	{
 		auto& cmdPool = vkContext::Context::GetInstance().renderer->cmdPool;
 		vertexBuffer.reset(new vkContext::UploadBuffer (
-			sizeof(vertex_data_type)*inVertexCount,
+			sizeof(Vertex)*inVertexCount,
 			vkContext::UBT_VertexBuffer
 		));
 		indexBuffer.reset(new vkContext::UploadBuffer(
-			sizeof(index_data_type)*inIndexCount,
+			sizeof(Index)*inIndexCount,
 			vkContext::UBT_IndexBuffer
 		));
 		vertexBuffer->SetData(verticesData);

@@ -57,13 +57,13 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADER_FILES} ${SOURCE_F
 set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 
 add_executable (JayRender "JayRender.cpp" "JayRender.h" 
+"Source/Vertex.h" "Source/Vertex.cpp"
 "Source/Context.cpp" "Source/Tools.h" 
 "Source/SwapChain.h" "Source/SwapChain.cpp"  
 "Source/Tools.cpp"  
 "Source/Shader.h" "Source/Shader.cpp" 
 "Source/RenderProcess.h" "Source/RenderProcess.cpp" 
 "Source/Renderer.h" "Source/Renderer.cpp" 
-"Source/Vertex.h" "Source/Vertex.cpp"
 "Source/Buffer.h" "Source/Buffer.cpp" 
 "Source/Uniform.h" "Source/Uniform.cpp" 
 "Source/UploadBuffer.hpp" "Source/UploadBuffer.cpp"

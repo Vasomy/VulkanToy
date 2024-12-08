@@ -23,9 +23,9 @@ namespace vkContext
 	}
 
 	const std::array<Vertex, 3>vertices = {
-		Vertex{0.0f,-0.5f},
-		Vertex{0.5f,0.5f},
-		Vertex{-0.5,0.5f}
+		Vertex{0.0f,-0.5f,0},
+		Vertex{0.5f,0.5f,0},
+		Vertex{-0.5,0.5f,0}
 	};
 
 	JRender::ObjectConstants objectConstants
