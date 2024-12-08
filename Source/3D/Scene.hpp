@@ -17,7 +17,7 @@ namespace JRender
 	public:
 		glm::mat4 d_view;
 		glm::mat4 d_proj;
-		readfile("Asset/obj")
+
 	public:
 		RawMesh* mesh = nullptr;
 		Scene();
