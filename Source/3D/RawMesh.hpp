@@ -6,15 +6,13 @@
 #include"../Vertex.h"
 namespace JRender
 {
-	using Vertex = vkDetail::Vertex;
-	using Index = uint32_t;
-
+	
 	class RawMesh
 	{
 		
 	public:
 		RawMesh() = delete;
-		RawMesh(int vertexCount,int indexCount,const vertex_data_type* verticesData, const index_data_type* indicesData);
+		RawMesh(int vertexCount,int indexCount,const Vertex* verticesData, const Index* indicesData);
 		~RawMesh();
 		glm::vec3 position = glm::vec3(0.0f,0.0f,0.0f);
 

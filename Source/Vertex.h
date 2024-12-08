@@ -1,5 +1,8 @@
 #pragma once
 #include"vulkan/vulkan.hpp"
+using Vertex = vkDetail::Vertex;
+using Index = uint32_t;
+
 namespace vkDetail
 {
 	class Vertex final

@@ -17,7 +17,6 @@ namespace vkContext
 			break;
 		case vkContext::UBT_UniformBuffer:
 			bufferType = vk::BufferUsageFlagBits::eUniformBuffer;
-			std::cout << "UN" << '\n';
 			break;
 		default:
 			break;
