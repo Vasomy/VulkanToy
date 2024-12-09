@@ -78,9 +78,9 @@ namespace vkContext
 	UploadBuffer::~UploadBuffer()
 	{
 		auto& context = Context::GetInstance();
+		context.device.unmapMemory(hostBuffer->memory);
 		hostBuffer.reset();
 		deviceBuffer.reset();
-		context.device.unmapMemory(hostBuffer->memory);
 		map = nullptr;
 	}
 
