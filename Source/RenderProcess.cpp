@@ -7,7 +7,7 @@ namespace vkContext
 	{
 		auto& context = Context::GetInstance();
 		InitRenderPass();
-		setLayout = CreateSetLayout();
+		//setLayout = CreateSetLayout();
 		layout = InitLayout();
 		InitPipeline(context.width,context.height);
 	}

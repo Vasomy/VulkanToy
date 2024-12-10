@@ -9,6 +9,7 @@
 #include"Tools.h"
 #include"RenderProcess.h"
 #include"Renderer.h"
+#include"CommandManager.hpp"
 
 
 namespace vkContext
@@ -39,7 +40,8 @@ namespace vkContext
 
 		VkSurfaceKHR surface;
 		
-		vk::CommandPool cmdPool;
+		std::unique_ptr<CommandManager>commandManager;
+		vk::CommandPool cmdPool;// comment
 		
 
 	private:

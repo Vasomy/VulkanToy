@@ -7,10 +7,10 @@ namespace JRender
 	const glm::vec3 worldUp = { 0,1,0 };
 	const std::array<Vertex, 4> rectVertices =
 	{
-		Vertex{ -0.5,-0.5,0},
-		Vertex{0.5,-0.5 ,0},
-		Vertex{-0.5, 0.5,0},
-		Vertex{0.5,0.5,0}
+		Vertex{ -0.5,-0.5,0,0,0},
+		Vertex{0.5,-0.5 ,0,0,1},
+		Vertex{-0.5, 0.5,0,1,0},
+		Vertex{0.5,0.5,0,1,1}
 	};
 	const std::array<uint32_t, 6>rectIndices =
 	{

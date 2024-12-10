@@ -32,7 +32,7 @@ namespace vkContext
 			vk::BufferUsageFlagBits::eTransferDst | bufferType,
 			vk::MemoryPropertyFlagBits::eDeviceLocal
 		));
-		map = context.device.mapMemory(hostBuffer->memory, 0, hostBuffer->size);
+		//map = context.device.mapMemory(hostBuffer->memory, 0, hostBuffer->size);
 	}
 
 	void UploadBuffer::SetData(const void* data, size_t size, int offset)
@@ -42,17 +42,23 @@ namespace vkContext
 
 		auto& context = Context::GetInstance();
 		
-		memcpy(map, data, size);
+		memcpy(hostBuffer->map, data, size);
 		// create one commandBuffer
-		auto cp = Context::GetInstance().cmdPool;
-		vk::CommandBufferAllocateInfo allocInfo;
-		allocInfo
-			.setCommandPool(cp)
-			.setCommandBufferCount(1)
-			.setLevel(vk::CommandBufferLevel::ePrimary)
-			;
-		auto cmdBuf = context.device.allocateCommandBuffers(allocInfo)[0];
+		
+		auto cmdBuf = context.commandManager->CreateOneCommandBuffer();
+		context.commandManager->ExecuteCommand(context.graphicsQueue
+			, [&](vk::CommandBuffer& cmdBuf)
+			{
+				vk::BufferCopy region;
+				region
+					.setSize(hostBuffer->size)
+					.setSrcOffset(0)
+					.setDstOffset(0)
+					;
+				cmdBuf.copyBuffer(hostBuffer->buffer, deviceBuffer->buffer, region);
 
+			});
+		return;
 		vk::CommandBufferBeginInfo beginInfo;
 		cmdBuf.begin(beginInfo);
 		vk::BufferCopy region;
@@ -62,6 +68,7 @@ namespace vkContext
 			.setDstOffset(0)
 			;
 		cmdBuf.copyBuffer(hostBuffer->buffer, deviceBuffer->buffer, region);
+
 		cmdBuf.end();
 
 		vk::SubmitInfo submit;
@@ -72,7 +79,7 @@ namespace vkContext
 
 		context.device.waitIdle();
 
-		context.device.freeCommandBuffers(cp, cmdBuf);
+		//context.device.freeCommandBuffers(cp, cmdBuf);
 	}
 
 	UploadBuffer::~UploadBuffer()
@@ -81,7 +88,6 @@ namespace vkContext
 		context.device.unmapMemory(hostBuffer->memory);
 		hostBuffer.reset();
 		deviceBuffer.reset();
-		map = nullptr;
 	}
 
 

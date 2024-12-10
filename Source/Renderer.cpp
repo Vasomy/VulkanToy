@@ -58,12 +58,14 @@ namespace vkContext
 		BufferVertexData();
 		CreateIndexBuffer();
 		BufferIndexData();
+		CreateTexture();
 
 		CreateUniformBuffer();
 		BufferUniformData();
 	
 		CreateDescriptorPool();
 		AllocateSets();
+		CreateSampler();
 
 		UpdateSets();
 
@@ -186,24 +188,12 @@ namespace vkContext
 
 	void Renderer::InitCommandPool()
 	{
-		/*vk::CommandPoolCreateInfo createInfo;
-		createInfo
-			.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
-			;
-		cmdPool = Context::GetInstance().device.createCommandPool(createInfo);
-		*/
-		cmdPool = Context::GetInstance().cmdPool;
 	}
 
 	void Renderer::AllocCommandBuffer()
 	{
-		vk::CommandBufferAllocateInfo allocInfo;
-		allocInfo
-			.setCommandPool(cmdPool)
-			.setCommandBufferCount(1)
-			.setLevel(vk::CommandBufferLevel::ePrimary)// 可以直接提交给GPU执行
-			;
-		cmdBuffer = Context::GetInstance().device.allocateCommandBuffers(allocInfo)[0];
+
+		cmdBuffer = Context::GetInstance().commandManager->CreateOneCommandBuffer();
 	}
 
 	void Renderer::CreateFence()
@@ -228,55 +218,13 @@ namespace vkContext
 	{
 		vertexBuffer.reset(new UploadBuffer(sizeof(vertices), UBT_VertexBuffer));
 		return;
-		//hostVertexBuffer.reset(new Buffer(
-		//	sizeof(vertices),
-		//	vk::BufferUsageFlagBits::eTransferSrc,
-		//	vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-		//));
-		//deviceVertexBuffer.reset(new Buffer(
-		//	sizeof(vertices),
-		//	vk::BufferUsageFlagBits::eTransferDst|vk::BufferUsageFlagBits::eVertexBuffer,
-		//	vk::MemoryPropertyFlagBits::eDeviceLocal
-		//));
+
 	}
 	void Renderer::BufferVertexData()
 	{
 		vertexBuffer->SetData(vertices.data(), sizeof(vertices), 0);
 		return;
-		//auto& context = Context::GetInstance();
-		//void* ptr = context.device.mapMemory(hostVertexBuffer->memory
-		//	, 0, hostVertexBuffer->size);
-		//memcpy(ptr, vertices.data(), sizeof(vertices));
-		//context.device.unmapMemory(hostVertexBuffer->memory);
-		//// create one commandBuffer
-		//vk::CommandBufferAllocateInfo allocInfo;
-		//allocInfo
-		//	.setCommandPool(cmdPool)
-		//	.setCommandBufferCount(1)
-		//	.setLevel(vk::CommandBufferLevel::ePrimary)
-		//	;
-		//auto cmdBuf = context.device.allocateCommandBuffers(allocInfo)[0];
-
-		//vk::CommandBufferBeginInfo beginInfo;
-		//cmdBuf.begin(beginInfo);
-		//vk::BufferCopy region;
-		//region
-		//	.setSize(hostVertexBuffer->size)
-		//	.setSrcOffset(0)
-		//	.setDstOffset(0)
-		//	;
-		//cmdBuf.copyBuffer(hostVertexBuffer->buffer, deviceVertexBuffer->buffer, region);
-		//cmdBuf.end();
-
-		//vk::SubmitInfo submit;
-		//submit
-		//	.setCommandBuffers(cmdBuf)
-		//	;
-		//context.graphicsQueue.submit(submit);
-
-		//context.device.waitIdle();
-
-		//context.device.freeCommandBuffers(cmdPool,cmdBuf);
+		
 	}
 
 	void Renderer::CreateIndexBuffer()
@@ -296,27 +244,7 @@ namespace vkContext
 		uniformBuffer.reset(new UploadBuffer(_3matSize, UBT_UniformBuffer));
 		uniformBuffer2.reset(new UploadBuffer(sizeof(uniform2), UBT_UniformBuffer));
 		return;
-		/*auto& context = Context::GetInstance();
-		auto& device = Context::GetInstance().device;
 
-		hostUniformBuffer.resize(1);
-		deviceUniformBuffer.resize(1);
-		for (auto& buffer : hostUniformBuffer)
-		{
-			buffer.reset(new Buffer(
-				sizeof(uniform),
-				vk::BufferUsageFlagBits::eTransferSrc,
-				vk::MemoryPropertyFlagBits::eHostCoherent|vk::MemoryPropertyFlagBits::eHostVisible
-			));
-		}
-		for (auto& buffer : deviceUniformBuffer)
-		{
-			buffer.reset(new Buffer(
-				sizeof(uniform),
-				vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eUniformBuffer,
-				vk::MemoryPropertyFlagBits::eDeviceLocal
-			));
-		}*/
 		
 	}
 
@@ -325,61 +253,27 @@ namespace vkContext
 		uniformBuffer->SetData(objectConstants.data(), sizeof(objectConstants), 0);
 		uniformBuffer2->SetData(uniform2.data(), sizeof(uniform2), 0);
 		return;
-		/*auto& context = Context::GetInstance();
-		auto& device = Context::GetInstance().device;
-		for (int i =0;i<hostUniformBuffer.size();++i)
-		{
-			auto& buffer = hostUniformBuffer[i];
-			void* ptr = device.mapMemory(buffer->memory, 0, buffer->size);
-			memcpy(ptr, uniform.data(), sizeof(uniform));
-			device.unmapMemory(buffer->memory);
-		}
 		
-		vk::CommandBufferAllocateInfo allocInfo;
-		allocInfo
-			.setCommandPool(cmdPool)
-			.setCommandBufferCount(1)
-			.setLevel(vk::CommandBufferLevel::ePrimary)
-			;
-		auto cmdBuf = device.allocateCommandBuffers(allocInfo)[0];
-		vk::CommandBufferBeginInfo beginInfo;
-		cmdBuf.begin(beginInfo);
 
-		assert(hostUniformBuffer.size() == deviceUniformBuffer.size());
-		vk::BufferCopy region;
+	}
 
-		region
-			.setSize(hostUniformBuffer[0]->size)
-			.setDstOffset(0)
-			.setSrcOffset(0)
-			;
-		for (int i = 0; i < hostUniformBuffer.size(); ++i)
-		{
-			std::cout << region.size << '\n';
-			cmdBuf.copyBuffer(hostUniformBuffer[i]->buffer, deviceUniformBuffer[i]->buffer, region);
-		}
-		cmdBuf.end();
-
-		vk::SubmitInfo submit;
-		submit
-			.setCommandBuffers(cmdBuf)
-			;
-		context.graphicsQueue.submit(submit);
-
-		context.device.waitIdle();
-
-		context.device.freeCommandBuffers(cmdPool, cmdBuf);*/
-
+	void Renderer::CreateTexture()
+	{
+		texture.reset(new Texture("asset/anke.jpg"));
 	}
 
 	void Renderer::CreateDescriptorPool() 
 	{
 		auto& device = Context::GetInstance().device;
 		vk::DescriptorPoolCreateInfo createInfo;
-		vk::DescriptorPoolSize poolSize;
-		poolSize
+		std::vector<vk::DescriptorPoolSize> poolSize(2);
+		poolSize[0]
 			.setType(vk::DescriptorType::eUniformBuffer)
 			.setDescriptorCount(maxFlightCount)
+			;
+		poolSize[1]
+			.setDescriptorCount(maxFlightCount)
+			.setType(vk::DescriptorType::eCombinedImageSampler)
 			;
 		createInfo
 			.setMaxSets(maxFlightCount)
@@ -401,13 +295,29 @@ namespace vkContext
 		sets = context.device.allocateDescriptorSets(allocInfo);
 	}
 
+	void Renderer::CreateSampler()
+	{
+		vk::SamplerCreateInfo createInfo;
+		createInfo.setMagFilter(vk::Filter::eLinear)
+			.setMinFilter(vk::Filter::eLinear)
+			.setAddressModeU(vk::SamplerAddressMode::eRepeat)
+			.setAddressModeV(vk::SamplerAddressMode::eRepeat)
+			.setAddressModeW(vk::SamplerAddressMode::eRepeat)
+			.setAnisotropyEnable(false)
+			.setBorderColor(vk::BorderColor::eIntOpaqueBlack)
+			.setUnnormalizedCoordinates(false)
+			.setCompareEnable(false)
+			.setMipmapMode(vk::SamplerMipmapMode::eLinear);
+		sampler = Context::GetInstance().device.createSampler(createInfo);
+	}
+
 	void Renderer::UpdateSets()
 	{
 		auto& context = Context::GetInstance();
 		for (int i =0;i<sets.size();++i)
 		{
 			auto& set = sets[i];
-			std::vector<vk::WriteDescriptorSet> writer(2);
+			std::vector<vk::WriteDescriptorSet> writer(3);
 			vk::DescriptorBufferInfo bufferInfo1;
 			bufferInfo1
 				.setBuffer(uniformBuffer->deviceBuffer->buffer)
@@ -436,31 +346,37 @@ namespace vkContext
 				.setDstArrayElement(0)
 				.setDescriptorCount(1)
 				;
+			// bind image
+			vk::DescriptorImageInfo imageInfo;
+			imageInfo
+				.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
+				.setImageView(texture->view)
+				.setSampler(sampler)
+				;
+
+			writer[2].setImageInfo(imageInfo)
+				.setDstBinding(2)
+				.setDstArrayElement(0)
+				.setDescriptorCount(1)
+				.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+				.setDstSet(set);
 			context.device.updateDescriptorSets(writer, {});
 		}
 	}
 
 	Renderer::~Renderer()
 	{
+		texture.reset();
 		uniformBuffer.reset();
 		vertexBuffer.reset();
-		/*hostVertexBuffer.reset();
-		deviceVertexBuffer.reset();
-		for (auto& buffer : hostUniformBuffer)
-		{
-			buffer.reset();
-		}
-		for (auto& buffer : deviceUniformBuffer)
-		{
-			buffer.reset();
-		}*/
+		auto& context = Context::GetInstance();
 		auto& device = Context::GetInstance().device;
 		//device.freeDescriptorSets(descPool,sets); // descSets会在销毁descPool再销毁一次
 		device.destroyDescriptorPool(descPool);
 		device.destroySemaphore(imageDrawAvaliable);
 		device.destroySemaphore(imageDrawFinish);
-		device.freeCommandBuffers(cmdPool, cmdBuffer);
-		device.destroyCommandPool(cmdPool);
+		context.commandManager->FreeCommandBuffer(cmdBuffer);
+		//device.freeCommandBuffers(cmdPool, cmdBuffer);
 		device.destroyFence(cmdFence);
 	}
 }

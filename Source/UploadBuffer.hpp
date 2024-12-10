@@ -15,14 +15,13 @@ namespace vkContext
 
 		std::unique_ptr<vkContext::Buffer> hostBuffer;
 		std::unique_ptr<vkContext::Buffer> deviceBuffer;
-		void* map = nullptr;
-		
+
 		UploadBuffer(size_t,UploadBufferType type);
 		virtual ~UploadBuffer();
 
 		void SetData(const void* data, size_t size = 0, int offset = 0);
 
-		const void* GetData()const { return map; }
+		const void* GetData()const { return hostBuffer->map; }
 		
 	private:
 

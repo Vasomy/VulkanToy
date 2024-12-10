@@ -25,6 +25,8 @@ namespace vkContext
 		instance_->shader.reset();
 		instance_->renderer.reset();
 		instance_->DestroySwapchain();
+		instance_->commandManager.reset();
+
 		instance_.reset();
 	}
 
@@ -179,12 +181,13 @@ namespace vkContext
 
 	void Context::InitCommandPool()
 	{
-		vk::CommandPoolCreateInfo createInfo;
+		/*vk::CommandPoolCreateInfo createInfo;
 		createInfo
 			.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
 			;
 		cmdPool = Context::GetInstance().device.createCommandPool(createInfo);
-		
+		*/
+		commandManager.reset(new CommandManager);
 	}
 
 	//destroy
@@ -196,8 +199,8 @@ namespace vkContext
 	Context::~Context()
 	{
 	
-		device.destroy();
 		delete(surface);
+		device.destroy();
 		instance.destroy();
 	}
 

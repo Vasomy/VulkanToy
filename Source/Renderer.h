@@ -5,6 +5,7 @@
 #include"UploadBuffer.hpp"
 #include"Uniform.h"
 #include"3D/Scene.hpp"
+#include"Texture.hpp"
 namespace vkContext {
 	class Renderer
 	{
@@ -33,21 +34,29 @@ namespace vkContext {
 		std::unique_ptr<UploadBuffer>uniformBuffer;
 		std::unique_ptr<UploadBuffer>uniformBuffer2;
 
+		std::unique_ptr<Texture> texture;
+
 		vk::DescriptorPool descPool;
 		std::vector<vk::DescriptorSet>sets;
+		vk::Sampler sampler;
 
 		void CreateVertexBuffer();
 		void BufferVertexData();
 		void CreateIndexBuffer();
 		void BufferIndexData();
+		void CreateTexture();
+
 
 		void CreateUniformBuffer();
 		void BufferUniformData();
 
 		void CreateDescriptorPool();
 		void AllocateSets();
+		void CreateSampler();
+
 
 		void UpdateSets();
+
 		
 	};
 }

@@ -6,6 +6,7 @@ namespace vkContext
 	class Buffer final
 	{
 	public:	
+		void* map = nullptr;
 		vk::Buffer buffer;// in Cpu
 
 		vk::DeviceMemory memory;
@@ -24,4 +25,5 @@ namespace vkContext
 		void BindingMemoryToBuffer();
 		MemoryInfo QueryMemoryInfo(vk::MemoryPropertyFlags);
 	};
+	std::uint32_t QueryBufferMemTypeIndex(std::uint32_t type, vk::MemoryPropertyFlags flag);
 }

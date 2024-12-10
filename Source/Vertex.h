@@ -1,22 +1,37 @@
 #pragma once
 #include"vulkan/vulkan.hpp"
+#include"glm/glm.hpp"
 using Index = uint32_t;
+struct vvv
+{
+	glm::vec3 v;
+	glm::vec3 v2;
+};
 
 class Vertex final
 {
 public:
 	float x, y, z;
+	float texU, texV;
 
-	static vk::VertexInputAttributeDescription GetAttribute()
+	static std::vector<vk::VertexInputAttributeDescription> GetAttribute()
 	{
-		vk::VertexInputAttributeDescription attr;
-		attr
+		std::vector<vk::VertexInputAttributeDescription> attrs;
+		attrs.push_back({});
+		attrs.back()
 			.setBinding(0)
-			.setFormat(vk::Format::eR32G32Sfloat)
+			.setFormat(vk::Format::eR32G32B32Sfloat)
 			.setLocation(0)
 			.setOffset(0)
 			;
-		return attr;
+		attrs.push_back({});
+		attrs.back()
+			.setBinding(0)
+			.setFormat(vk::Format::eR32G32Sfloat)
+			.setLocation(1)
+			.setOffset(3*sizeof(float))
+			;
+		return attrs;
 	}
 	static vk::VertexInputBindingDescription GetBinding()
 
