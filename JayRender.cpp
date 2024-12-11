@@ -27,12 +27,19 @@ int main(int argc,char**argv)
 	}
 
 	vkContext::Context::Init(extensions,window, screen_width,screen_height);
-
+	auto& context = vkContext::Context::GetInstance();
 	auto& renderer = vkContext::Context::GetRenderer();
+	float lastTime = glfwGetTime();
+	float deltaTime = 0;
+	context.deltaTime = deltaTime;
 	while (!glfwWindowShouldClose(window))
 	{
+		deltaTime = glfwGetTime()-lastTime;
+		context.deltaTime = deltaTime;
 		renderer.Render();
 		glfwPollEvents();
+		lastTime = glfwGetTime();
+
 	}
 	vkContext::Context::Quit();
 

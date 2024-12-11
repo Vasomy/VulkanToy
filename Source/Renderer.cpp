@@ -80,11 +80,17 @@ namespace vkContext
 		auto& device = Context::GetInstance().device;
 		auto& context = Context::GetInstance();
 		auto* window = Context::GetInstance().m_window;
+	
+		auto dt = context.deltaTime;
+		scene->Tick(dt);
+
+
 
 		objectConstants.view = scene->d_view;
 		objectConstants.proj = scene->d_proj;
 		auto model = scene->mesh->GetModel();
 		uniformBuffer->SetData(&objectConstants);
+		
 
 		auto* mesh = scene->mesh;
 		
@@ -146,19 +152,34 @@ namespace vkContext
 				.setFramebuffer(context.swapchain->framebuffers[imageIndex])
 				.setClearValues(clearValue)
 				;
-			vk::DeviceSize dSize = 0;
 			//cmdBuffer.bindVertexBuffers(0, vertexBuffer->deviceBuffer->buffer,dSize);
 			//cmdBuffer.bindIndexBuffer(indexBuffer->deviceBuffer->buffer, 0, vk::IndexType::eUint32);
 			auto layout = context.renderProcess->layout;
-			cmdBuffer.bindVertexBuffers(0, scene->mesh->GetVertexBuffer(), dSize);
+			vk::DeviceSize dSize = 0;
+			cmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, sets[0], {});
+			cmdBuffer.beginRenderPass(renderPassBeginInfo, {});
+			for (int i = 0; i < scene->go->meshes.size(); ++i)
+			{
+				auto& go = scene->go;
+				auto& mesh = scene->go->meshes[i];
+				//texture->view = go->texture->view;
+
+				cmdBuffer.bindVertexBuffers(0, scene->mesh->GetVertexBuffer(), dSize);
+				cmdBuffer.bindIndexBuffer(scene->mesh->GetIndexBuffer(), dSize,vk::IndexType::eUint32);
+				
+				cmdBuffer.pushConstants(layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &mesh->GetModel());
+				cmdBuffer.drawIndexed(mesh->GetIndexCount(), 1, 0, 0, 0);
+			}
+			cmdBuffer.endRenderPass();
+			/*cmdBuffer.bindVertexBuffers(0, scene->mesh->GetVertexBuffer(), dSize);
 			cmdBuffer.bindIndexBuffer(scene->mesh->GetIndexBuffer(), dSize,vk::IndexType::eUint32);
 			cmdBuffer.pushConstants(layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4),&model);
 			cmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, context.renderProcess->layout, 0, sets[0], {});
 			cmdBuffer.beginRenderPass(renderPassBeginInfo, {});
 			{
 				cmdBuffer.drawIndexed(6, 1, 0, 0, 0);
-			}
-			cmdBuffer.endRenderPass();
+			}*/
+			//cmdBuffer.endRenderPass();
 		}
 		cmdBuffer.end();
 
@@ -269,7 +290,7 @@ namespace vkContext
 		std::vector<vk::DescriptorPoolSize> poolSize(2);
 		poolSize[0]
 			.setType(vk::DescriptorType::eUniformBuffer)
-			.setDescriptorCount(maxFlightCount)
+			.setDescriptorCount(maxFlightCount * 2)
 			;
 		poolSize[1]
 			.setDescriptorCount(maxFlightCount)
@@ -278,6 +299,7 @@ namespace vkContext
 		createInfo
 			.setMaxSets(maxFlightCount)
 			.setPoolSizes(poolSize)
+
 			;
 		descPool = device.createDescriptorPool(createInfo);
 	}
@@ -286,6 +308,14 @@ namespace vkContext
 	{
 		auto& context = Context::GetInstance();
 		std::vector<vk::DescriptorSetLayout>layouts(maxFlightCount, context.shader->GetLayouts()[0]);
+		if (!layouts.data())
+		{
+			std::cout << "A" << '\n';
+		}
+		if (descPool)
+		{
+			std::cout << "DESC\n";
+		}
 		vk::DescriptorSetAllocateInfo allocInfo;
 		allocInfo
 			.setDescriptorPool(descPool)

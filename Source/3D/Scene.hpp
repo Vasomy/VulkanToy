@@ -1,6 +1,8 @@
 #pragma once
 #include"vulkan/vulkan.hpp"
 #include"RawMesh.hpp"
+#include"GameObject/GameObject.hpp"
+#include"Camera.hpp"
 namespace JRender
 {
 	struct ObjectConstants
@@ -17,12 +19,14 @@ namespace JRender
 	public:
 		glm::mat4 d_view;
 		glm::mat4 d_proj;
-
+		RenderCamera camera;
 	public:
 		RawMesh* mesh = nullptr;
+		JGameObject* go = nullptr;
 		Scene();
 		~Scene();
 		void Init();
+		void Tick(float dt);
 		void CreateRectMesh();
 		std::shared_ptr<vkContext::UploadBuffer> mvpMat;
 		void UpdateSets();

@@ -1,0 +1,18 @@
+# ninja log v5
+11	7328	7553635362437397	CMakeFiles/JayRender.dir/JayRender.cpp.obj	b01bd74724f49630
+16	9367	7553635383586874	CMakeFiles/JayRender.dir/Source/Context.cpp.obj	39f4fce374c139fa
+9473	10122	7553635391307987	JayRender.exe	da0b5f2fc70286f7
+44	9460	7553635384530506	CMakeFiles/JayRender.dir/Source/UploadBuffer.cpp.obj	c46899f0e19fb73c
+1	8	0	clean	d0ac3417202767ef
+34	3444	7552108494401085	CMakeFiles/JayRender.dir/Source/Uniform.cpp.obj	d49e6cb388697713
+24	8916	7553635378827902	CMakeFiles/JayRender.dir/Source/Shader.cpp.obj	728cbbba4057133a
+2	560	7538298171390940	CMakeFiles/JayRender.dir/Source/Tools.cpp.obj	a31c479e21b39dc7
+20	9418	7553635384181721	CMakeFiles/JayRender.dir/Source/SwapChain.cpp.obj	e9abb3422209eb2c
+2	314	7553639588930568	build.ninja	d6718642e9edf288
+29	8822	7553635377279650	CMakeFiles/JayRender.dir/Source/RenderProcess.cpp.obj	9a9389286a8491ed
+34	9473	7553635384689445	CMakeFiles/JayRender.dir/Source/Renderer.cpp.obj	c923c9b50c2db28b
+30	2390	7553336403956046	CMakeFiles/JayRender.dir/Source/Vertex.cpp.obj	9e1783d64cee4c0b
+39	9219	7553635382012778	CMakeFiles/JayRender.dir/Source/Buffer.cpp.obj	14d75db1326aa7ad
+60	7144	7553635361170662	CMakeFiles/JayRender.dir/Source/3D/GameObject/GameObject.cpp.obj	5414b58bcd86e810
+54	7552	7553635364979009	CMakeFiles/JayRender.dir/Source/3D/RawMesh.cpp.obj	70d3fc15d02b6bee
+49	7382	7553635363540592	CMakeFiles/JayRender.dir/Source/3D/Scene.cpp.obj	ac52fef6c9a2dce8

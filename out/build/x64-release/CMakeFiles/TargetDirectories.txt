@@ -1,0 +1,3 @@
+F:/MyProject/JayRender/out/build/x64-release/CMakeFiles/JayRender.dir
+F:/MyProject/JayRender/out/build/x64-release/CMakeFiles/edit_cache.dir
+F:/MyProject/JayRender/out/build/x64-release/CMakeFiles/rebuild_cache.dir

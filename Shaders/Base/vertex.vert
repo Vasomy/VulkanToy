@@ -1,6 +1,9 @@
 
 #version 450
 layout(location = 0) in vec3 Position;
+layout(location = 1) in vec2 Texcoord;
+
+layout(location = 0) out vec2 texcoord;
 
 layout(binding = 0) uniform ViewProjMat{
 	mat4 view;
@@ -8,20 +11,13 @@ layout(binding = 0) uniform ViewProjMat{
 
 }mvp;
 
-layout(location = 0) out vec4 dcolor;
-
 layout(push_constant)uniform PushConstant
 {
 	mat4 model;
 }pc;
-/*
-layout(push_constant)uniform ModelMat{
-}modelMat;
-*/
+
 void main()
 {
-
 	gl_Position = mvp.proj*mvp.view*pc.model*vec4(Position,1.0f);
-	dcolor = mvp.proj*mvp.view*pc.model*vec4(Position,1.0f);
-	//dcolor = vec4(tr,0,tr,1.0f);
+	texcoord = Texcoord;
 }

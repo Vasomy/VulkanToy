@@ -57,8 +57,12 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADER_FILES} ${SOURCE_F
 set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 
 add_executable (JayRender "JayRender.cpp" "JayRender.h" 
+"Source/Tools/ImageLoader.hpp" "Source/Tools/ImageLoader.cpp"
 "Source/Vertex.h" "Source/Vertex.cpp"
 "Source/Context.cpp" "Source/Tools.h" 
+"Source/Debug/LogInfo.hpp" "Source/Debug/LogInfo.cpp" 
+"Source/Tools/ModelLoader.hpp" "Source/Tools/ModelLoader.cpp" 
+"Source/CommandManager.hpp" "Source/CommandManager.cpp" 
 "Source/SwapChain.h" "Source/SwapChain.cpp"  
 "Source/Tools.cpp"  
 "Source/Shader.h" "Source/Shader.cpp" 
@@ -66,10 +70,12 @@ add_executable (JayRender "JayRender.cpp" "JayRender.h"
 "Source/Renderer.h" "Source/Renderer.cpp" 
 "Source/Buffer.h" "Source/Buffer.cpp" 
 "Source/Uniform.h" "Source/Uniform.cpp" 
+"Source/Texture.hpp" "Source/Texture.cpp"
 "Source/UploadBuffer.hpp" "Source/UploadBuffer.cpp"
-"Source/3D/Scene.hpp" "Source/3D/Scene.cpp" 
-"Source/3D/RawMesh.hpp" "Source/3D/RawMesh.cpp" 
 "Source/3D/GameObject/GameObject.hpp" "Source/3D/GameObject/GameObject.cpp"
+"Source/3D/RawMesh.hpp" "Source/3D/RawMesh.cpp" 
+"Source/3D/Camera.hpp" "Source/3D/Camera.cpp"
+"Source/3D/Scene.hpp" "Source/3D/Scene.cpp" 
 )
 
 target_link_libraries(JayRender PUBLIC $ENV{VK_SDK_PATH}/Lib/glfw3.lib)
@@ -83,6 +89,7 @@ include_directories(${VK_SDK_INCLUDE})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET JayRender PROPERTY CXX_STANDARD 17)
+  message("????")
 endif()
 
 # TODO: 如有需要，请添加测试并安装目标。

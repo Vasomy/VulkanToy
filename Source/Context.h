@@ -20,6 +20,7 @@ namespace vkContext
 
 
 		GLFWwindow* m_window;
+		float deltaTime = 0.0f;;
 
 		static void Init(std::vector<const char*>&extensions,GLFWwindow*window,int w,int h);
 		static void Quit();
