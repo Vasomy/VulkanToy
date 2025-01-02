@@ -3,6 +3,7 @@
 #include"RawMesh.hpp"
 #include"GameObject/GameObject.hpp"
 #include"Camera.hpp"
+#include<memory>
 namespace JRender
 {
 	struct ObjectConstants
@@ -21,8 +22,10 @@ namespace JRender
 		glm::mat4 d_proj;
 		RenderCamera camera;
 	public:
-		RawMesh* mesh = nullptr;
-		JGameObject* go = nullptr;
+		std::shared_ptr<JGameObject> go = nullptr;
+
+		std::vector<std::shared_ptr<JGameObject>> gameObjects;
+
 		Scene();
 		~Scene();
 		void Init();

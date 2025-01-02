@@ -15,12 +15,14 @@ namespace JRender
 		
 		JGameObject(const std::string& name);
 		JGameObject(JGameObject& rhs) = default;
+		~JGameObject();
 		
 		uint32_t id;
 		std::string name;
 		std::vector<std::shared_ptr<RawMesh>> meshes;
 		std::unique_ptr<vkContext::Texture> texture;
-		void LoadTexture(const char* filename);
+		void LoadTexture(const char* filename = nullptr);
 		vkContext::Texture& GetTexture() { return *texture; }
+		void FreeAllMesh();
 	};
 }

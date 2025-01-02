@@ -13,7 +13,9 @@ namespace vkContext
 		createInfo
 			.setClipped(true)
 			.setImageArrayLayers(1)
-			.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
+			.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment
+				| vk::ImageUsageFlagBits::eSampled
+			)
 			.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
 			.setSurface(Context::GetInstance().surface)
 			.setImageColorSpace(info.format.colorSpace)

@@ -6,7 +6,7 @@ layout(binding = 1)uniform UBO2{
 	vec3 color;
 }ubo2;
 
-layout(binding = 2)uniform sampler2D Sampler;
+layout(set = 1,binding = 0)uniform sampler2D Sampler;
 
 void main()
 {

@@ -11,9 +11,14 @@ struct vvv
 class Vertex final
 {
 public:
-	float x, y, z;
-	float texU, texV;
-
+	union {
+		struct { float x, y, z; };
+		struct { glm::vec3 position; };
+	};
+	union {
+		struct { float texU, texV; };
+		struct { glm::vec2 texcoord; };
+	};
 	static std::vector<vk::VertexInputAttributeDescription> GetAttribute()
 	{
 		std::vector<vk::VertexInputAttributeDescription> attrs;

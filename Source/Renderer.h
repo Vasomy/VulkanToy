@@ -6,16 +6,21 @@
 #include"Uniform.h"
 #include"3D/Scene.hpp"
 #include"Texture.hpp"
+#include"DescriptorManager.hpp"
 namespace vkContext {
 	class Renderer
 	{
-		JRender::Scene* scene = nullptr;
 		static const int maxFlightCount = 1;
 	public:
+		JRender::Scene* scene = nullptr;
 		Renderer();
 		~Renderer();
 		void Render();
+		void PresentFrame();
 		vk::CommandPool cmdPool;
+		vk::Sampler sampler;
+		int32_t currentFrameIndex;
+
 	private:
 		void InitCommandPool();
 		void AllocCommandBuffer();
@@ -37,15 +42,11 @@ namespace vkContext {
 		std::unique_ptr<Texture> texture;
 
 		vk::DescriptorPool descPool;
-		std::vector<vk::DescriptorSet>sets;
-		vk::Sampler sampler;
+		std::vector<DescriptorSetManager::SetInfo>sets;
+		std::vector<vk::DescriptorSet>imgSets;
 
-		void CreateVertexBuffer();
-		void BufferVertexData();
-		void CreateIndexBuffer();
-		void BufferIndexData();
-		void CreateTexture();
 
+		
 
 		void CreateUniformBuffer();
 		void BufferUniformData();

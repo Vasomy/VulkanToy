@@ -10,6 +10,7 @@
 #include"RenderProcess.h"
 #include"Renderer.h"
 #include"CommandManager.hpp"
+#include"UiContext.hpp"
 
 
 namespace vkContext
@@ -39,11 +40,12 @@ namespace vkContext
 		std::unique_ptr<Shader>shader;
 		std::unique_ptr<Renderer> renderer;
 
+		vk::Sampler sampler;
+
 		VkSurfaceKHR surface;
 		
 		std::unique_ptr<CommandManager>commandManager;
-		vk::CommandPool cmdPool;// comment
-		
+	
 
 	private:
 		Context(std::vector<const char*>& extensions, GLFWwindow* window);
@@ -63,8 +65,11 @@ namespace vkContext
 
 		void InitCommandPool();
 
+		void CreateSampler();
+
 		//destroy
 		void DestroySwapchain();
+
 
 		struct QueueFamilyIndices
 		{

@@ -22,6 +22,11 @@ namespace JRender
 		int GetVertexCount() { return vertexCount; }
 		int GetIndexCount() { return indexCount; }
 		glm::mat4 GetModel();
+
+		Index* GetIndex() { return (Index*)indexBuffer->GetData(); }
+		Vertex* GetVertex() { return (Vertex*)vertexBuffer->GetData(); }
+
+
 	private:
 		std::shared_ptr<vkContext::UploadBuffer>vertexBuffer;
 		std::shared_ptr<vkContext::UploadBuffer>indexBuffer;

@@ -42,7 +42,7 @@ namespace vkContext
 	void Shader::InitDescriptorSetLayouts()
 	{
 		vk::DescriptorSetLayoutCreateInfo createInfo;
-		std::vector<vk::DescriptorSetLayoutBinding> bindings(3);
+		std::vector<vk::DescriptorSetLayoutBinding> bindings(2);
 		bindings[0]
 			.setBinding(0)
 			.setDescriptorCount(1)
@@ -55,16 +55,20 @@ namespace vkContext
 			.setDescriptorType(vk::DescriptorType::eUniformBuffer)
 			.setStageFlags(vk::ShaderStageFlagBits::eFragment)
 			;
-		bindings[2]
-			.setBinding(2)
-			.setDescriptorCount(1)
-			.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-			.setStageFlags(vk::ShaderStageFlagBits::eFragment)
-			;
 		createInfo
 			.setBindings(bindings)
 			;
 		layouts.push_back(Context::GetInstance().device.createDescriptorSetLayout(createInfo));
+		bindings.resize(1);
+		bindings[0]
+			.setBinding(0)
+			.setDescriptorCount(1)
+			.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+			.setStageFlags(vk::ShaderStageFlagBits::eFragment)
+			;
+		createInfo.setBindings(bindings);
+		layouts.push_back(Context::GetInstance().device.createDescriptorSetLayout(createInfo));
+
 	}
 
 	vk::PushConstantRange Shader::GetPushConstantsRange()
@@ -82,6 +86,10 @@ namespace vkContext
 	Shader::~Shader()
 	{
 		auto& device = Context::GetInstance().device;
+		for (auto& layout : layouts)
+		{
+			device.destroyDescriptorSetLayout(layout);
+		}
 		device.destroyShaderModule(vertexModule);
 		device.destroyShaderModule(fragmentModule);
 	}

@@ -5,11 +5,34 @@ namespace JRender
 	{
 		this->name = name;
 	}
-	void JGameObject::LoadTexture(const char* filename)
+	JGameObject::~JGameObject()
 	{
 		texture.reset();
-		texture.reset(
-			new vkContext::Texture(filename)
-		);
+		for (auto& mesh : meshes)
+		{
+			mesh.reset();
+		}
+	}
+	void JGameObject::LoadTexture(const char* filename)
+	{
+		if (filename == nullptr)
+		{
+
+		}
+		else
+		{
+			texture.reset(
+				new vkContext::Texture(filename)
+			);
+		}
+	}
+	void JGameObject::FreeAllMesh()
+	{
+		for(auto& i : meshes)
+		{
+			i.reset();
+		}
+		meshes.clear();
+		
 	}
 }

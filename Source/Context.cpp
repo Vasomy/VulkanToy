@@ -9,24 +9,20 @@ namespace vkContext
 	{
 		instance_.reset(new Context(extensions, window));
 		instance_->Init();
-		//instance_->InitSwapchain(w, h);
-		//instance_->shader.reset(new Shader(tools::ReadBinFile("asset/vertex.spv"), tools::ReadBinFile("asset/frag.spv")));
-		//instance_->renderProcess->InitRenderPass();
-		//instance_->renderProcess->CreateSetLayout();
-		//instance_->renderProcess->InitLayout();
-		//instance_->renderProcess->InitPipeline(w,h);
-		//instance_->swapchain->CreateFramebuffers();
-		//instance_->InitRenderer();
+		UiContext::Init();
+	
 	}
 	void Context::Quit()
 	{
 		instance_->device.waitIdle();
+		UiContext::Quit();
 		instance_->renderProcess.reset();
 		instance_->shader.reset();
 		instance_->renderer.reset();
 		instance_->DestroySwapchain();
 		instance_->commandManager.reset();
-
+		DescriptorSetManager::Quit();
+	
 		instance_.reset();
 	}
 
@@ -63,6 +59,8 @@ namespace vkContext
 
 	void Context::Init()
 	{
+		CreateSampler();
+
 		InitSwapchain(width,height);
 		shader.reset(new Shader(tools::ReadBinFile("asset/vertex.spv"), tools::ReadBinFile("asset/frag.spv")));
 		renderProcess.reset(new RenderProcess);
@@ -190,6 +188,22 @@ namespace vkContext
 		commandManager.reset(new CommandManager);
 	}
 
+	void Context::CreateSampler()
+	{
+		vk::SamplerCreateInfo createInfo;
+		createInfo.setMagFilter(vk::Filter::eLinear)
+			.setMinFilter(vk::Filter::eLinear)
+			.setAddressModeU(vk::SamplerAddressMode::eRepeat)
+			.setAddressModeV(vk::SamplerAddressMode::eRepeat)
+			.setAddressModeW(vk::SamplerAddressMode::eRepeat)
+			.setAnisotropyEnable(false)
+			.setBorderColor(vk::BorderColor::eIntOpaqueBlack)
+			.setUnnormalizedCoordinates(false)
+			.setCompareEnable(false)
+			.setMipmapMode(vk::SamplerMipmapMode::eLinear);
+		sampler = Context::GetInstance().device.createSampler(createInfo);
+	}
+
 	//destroy
 	void Context::DestroySwapchain()
 	{
@@ -198,8 +212,8 @@ namespace vkContext
 
 	Context::~Context()
 	{
-	
-		delete(surface);
+		vkDestroySurfaceKHR(instance, surface,nullptr);
+		device.destroySampler(sampler);
 		device.destroy();
 		instance.destroy();
 	}

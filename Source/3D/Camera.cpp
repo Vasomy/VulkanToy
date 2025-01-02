@@ -68,6 +68,15 @@ namespace JRender
     {
         MoveCamera(dt, right);
     }
+    void RenderCamera::MoveUp(float dt)
+    {
+        MoveCamera(dt, up);
+    }
+    void RenderCamera::MoveDown(float dt)
+    {
+        MoveCamera(dt, -up);
+    }
+
     void RenderCamera::MoveCamera(float dt,glm::vec3 direction)
     {
         position += direction * moveSpeed * dt;

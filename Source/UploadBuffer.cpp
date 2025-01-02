@@ -45,7 +45,6 @@ namespace vkContext
 		memcpy(hostBuffer->map, data, size);
 		// create one commandBuffer
 		
-		auto cmdBuf = context.commandManager->CreateOneCommandBuffer();
 		context.commandManager->ExecuteCommand(context.graphicsQueue
 			, [&](vk::CommandBuffer& cmdBuf)
 			{
@@ -58,7 +57,7 @@ namespace vkContext
 				cmdBuf.copyBuffer(hostBuffer->buffer, deviceBuffer->buffer, region);
 
 			});
-		return;
+		return;/*
 		vk::CommandBufferBeginInfo beginInfo;
 		cmdBuf.begin(beginInfo);
 		vk::BufferCopy region;
@@ -79,7 +78,8 @@ namespace vkContext
 
 		context.device.waitIdle();
 
-		//context.device.freeCommandBuffers(cp, cmdBuf);
+		context.commandManager->FreeCommandBuffer(cmdBuf);
+		*/
 	}
 
 	UploadBuffer::~UploadBuffer()

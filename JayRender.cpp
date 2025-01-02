@@ -3,11 +3,15 @@
 
 #include "JayRender.h"
 #include"Source/Context.h"
-
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 using namespace std;
-const int screen_width = 600, screen_height = 400;
+const int screen_width = 1440, screen_height = 960;
 int main(int argc,char**argv)
 {
+
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -37,6 +41,7 @@ int main(int argc,char**argv)
 		deltaTime = glfwGetTime()-lastTime;
 		context.deltaTime = deltaTime;
 		renderer.Render();
+		vkContext::UiContext::GetInstance().UiRender();
 		glfwPollEvents();
 		lastTime = glfwGetTime();
 

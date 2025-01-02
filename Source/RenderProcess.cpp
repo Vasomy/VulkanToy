@@ -54,6 +54,7 @@ namespace vkContext
 			{ 0,0 },
 			{ static_cast<uint32_t>(width),static_cast<uint32_t>(height) }
 		);
+
 		viewportInfo
 			.setViewports(viewport)
 			.setScissors(rect)
@@ -65,7 +66,7 @@ namespace vkContext
 			.setRasterizerDiscardEnable(false)
 			.setCullMode(vk::CullModeFlagBits::eNone)
 			.setFrontFace(vk::FrontFace::eCounterClockwise)
-			.setPolygonMode(vk::PolygonMode::eFill)
+			.setPolygonMode(vk::PolygonMode::eLine)
 			.setLineWidth(1)
 			;
 		createInfo.setPRasterizationState(&rastInfo);
@@ -79,11 +80,32 @@ namespace vkContext
 		createInfo.setPMultisampleState(&multisampleInfo);
 
 		//7 test depth stencil
-		
+		vk::PipelineColorBlendAttachmentState blendAttachState;
+		blendAttachState
+			.setBlendEnable(true)
+			.setColorWriteMask(
+				vk::ColorComponentFlagBits::eA |
+				vk::ColorComponentFlagBits::eR |
+				vk::ColorComponentFlagBits::eG |
+				vk::ColorComponentFlagBits::eB 
+			)
+			.setSrcColorBlendFactor(vk::BlendFactor::eOne)
+			.setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha)
+			.setColorBlendOp(vk::BlendOp::eAdd)
+			.setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
+			.setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+			.setAlphaBlendOp(vk::BlendOp::eAdd)
+			;
+		vk::PipelineColorBlendStateCreateInfo blendInfo;
+		blendInfo
+			.setAttachments(blendAttachState)
+			.setLogicOpEnable(false)
+			;
+		//createInfo.setPColorBlendState(&blendInfo);
 		//
 
 		//8 ColorBlending
-		vk::PipelineColorBlendStateCreateInfo blendInfo;
+		//vk::PipelineColorBlendStateCreateInfo blendInfo;
 		vk::PipelineColorBlendAttachmentState attachs;
 		attachs
 			.setBlendEnable(false)

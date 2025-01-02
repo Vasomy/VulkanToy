@@ -1,5 +1,6 @@
 #include"Renderer.h"
 #include"Context.h"
+#include"QEM.h"
 namespace vkContext
 {
 	void DebugMat4(glm::mat4&mat)
@@ -54,11 +55,7 @@ namespace vkContext
 		AllocCommandBuffer();
 		CreateFence();
 		CreateSems();
-		CreateVertexBuffer();
-		BufferVertexData();
-		CreateIndexBuffer();
-		BufferIndexData();
-		CreateTexture();
+		
 
 		CreateUniformBuffer();
 		BufferUniformData();
@@ -72,6 +69,9 @@ namespace vkContext
 		scene = new JRender::Scene;
 		scene->Init();
 		scene->CreateRectMesh();
+		
+		
+
 	}
 
 	void Renderer::Render()
@@ -88,21 +88,11 @@ namespace vkContext
 
 		objectConstants.view = scene->d_view;
 		objectConstants.proj = scene->d_proj;
-		auto model = scene->mesh->GetModel();
+
 		uniformBuffer->SetData(&objectConstants);
 		
 
-		auto* mesh = scene->mesh;
-		
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		{
-			mesh->position.x += 0.01f;
-		}
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		{
-			mesh->position.x -= 0.01f;
-		}
-		
+	
 		//std::cout << "renderer\n";
 
 		if (context.device.waitForFences(cmdFence, true, std::numeric_limits<uint64_t>::max()) != vk::Result::eSuccess)
@@ -122,8 +112,8 @@ namespace vkContext
 		{
 			std::cout << "acquire next image fail!\n";
 		}
-
 		auto imageIndex = result.value;
+		currentFrameIndex = imageIndex;
 		cmdBuffer.reset();
 		vk::CommandBufferBeginInfo beginInfo;
 		beginInfo
@@ -156,19 +146,22 @@ namespace vkContext
 			//cmdBuffer.bindIndexBuffer(indexBuffer->deviceBuffer->buffer, 0, vk::IndexType::eUint32);
 			auto layout = context.renderProcess->layout;
 			vk::DeviceSize dSize = 0;
-			cmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, sets[0], {});
 			cmdBuffer.beginRenderPass(renderPassBeginInfo, {});
-			for (int i = 0; i < scene->go->meshes.size(); ++i)
-			{
-				auto& go = scene->go;
-				auto& mesh = scene->go->meshes[i];
-				//texture->view = go->texture->view;
+			for (int goIndex = 0; goIndex < scene->gameObjects.size(); ++goIndex) {
+				auto& go = scene->gameObjects[goIndex];
+				for (int i = 0; i < go->meshes.size(); ++i)
+				{
+					auto& mesh = go->meshes[i];
 
-				cmdBuffer.bindVertexBuffers(0, scene->mesh->GetVertexBuffer(), dSize);
-				cmdBuffer.bindIndexBuffer(scene->mesh->GetIndexBuffer(), dSize,vk::IndexType::eUint32);
-				
-				cmdBuffer.pushConstants(layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &mesh->GetModel());
-				cmdBuffer.drawIndexed(mesh->GetIndexCount(), 1, 0, 0, 0);
+					cmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, { sets[0].set,go->texture->set.set }, {});
+
+
+					cmdBuffer.bindVertexBuffers(0, mesh->GetVertexBuffer(), dSize);
+					cmdBuffer.bindIndexBuffer(mesh->GetIndexBuffer(), dSize, vk::IndexType::eUint32);
+
+					cmdBuffer.pushConstants(layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &mesh->GetModel());
+					cmdBuffer.drawIndexed(mesh->GetIndexCount(), 1, 0, 0, 0);
+				}
 			}
 			cmdBuffer.endRenderPass();
 			/*cmdBuffer.bindVertexBuffers(0, scene->mesh->GetVertexBuffer(), dSize);
@@ -193,18 +186,23 @@ namespace vkContext
 			;
 		context.graphicsQueue.submit(submitInfo,cmdFence);
 
+		
+
 		vk::PresentInfoKHR presentInfoKHR;
 		presentInfoKHR
 			.setImageIndices(imageIndex)
 			.setSwapchains(context.swapchain->swapchain)
 			.setWaitSemaphores(imageDrawFinish)
 			;
-		if (context.presentQueue.presentKHR(presentInfoKHR) !=vk::Result::eSuccess)
+		if (context.presentQueue.presentKHR(presentInfoKHR) != vk::Result::eSuccess)
 		{
 			std::cout << "Image present failed!\n";
 		}
+	}
 
-
+	void Renderer::PresentFrame()
+	{
+		
 	}
 
 	void Renderer::InitCommandPool()
@@ -235,28 +233,6 @@ namespace vkContext
 	}
 
 
-	void Renderer::CreateVertexBuffer()
-	{
-		vertexBuffer.reset(new UploadBuffer(sizeof(vertices), UBT_VertexBuffer));
-		return;
-
-	}
-	void Renderer::BufferVertexData()
-	{
-		vertexBuffer->SetData(vertices.data(), sizeof(vertices), 0);
-		return;
-		
-	}
-
-	void Renderer::CreateIndexBuffer()
-	{
-		indexBuffer.reset(new UploadBuffer(sizeof(indices), UBT_IndexBuffer));
-	}
-
-	void Renderer::BufferIndexData()
-	{
-		indexBuffer->SetData(indices.data(), sizeof(indices), 0);
-	}
 
 
 	void Renderer::CreateUniformBuffer()
@@ -274,28 +250,23 @@ namespace vkContext
 		uniformBuffer->SetData(objectConstants.data(), sizeof(objectConstants), 0);
 		uniformBuffer2->SetData(uniform2.data(), sizeof(uniform2), 0);
 		return;
-		
-
 	}
 
-	void Renderer::CreateTexture()
-	{
-		texture.reset(new Texture("asset/anke.jpg"));
-	}
 
 	void Renderer::CreateDescriptorPool() 
 	{
+		DescriptorSetManager::Init(maxFlightCount);
+		return;
+		//descPool = DescriptorSetManager::GetInstance().AllocBufferSets(maxFlightCount);
+
 		auto& device = Context::GetInstance().device;
 		vk::DescriptorPoolCreateInfo createInfo;
-		std::vector<vk::DescriptorPoolSize> poolSize(2);
+		std::vector<vk::DescriptorPoolSize> poolSize(1);
 		poolSize[0]
 			.setType(vk::DescriptorType::eUniformBuffer)
 			.setDescriptorCount(maxFlightCount * 2)
 			;
-		poolSize[1]
-			.setDescriptorCount(maxFlightCount)
-			.setType(vk::DescriptorType::eCombinedImageSampler)
-			;
+	
 		createInfo
 			.setMaxSets(maxFlightCount)
 			.setPoolSizes(poolSize)
@@ -306,39 +277,23 @@ namespace vkContext
 
 	void Renderer::AllocateSets()
 	{
-		auto& context = Context::GetInstance();
-		std::vector<vk::DescriptorSetLayout>layouts(maxFlightCount, context.shader->GetLayouts()[0]);
-		if (!layouts.data())
-		{
-			std::cout << "A" << '\n';
-		}
-		if (descPool)
-		{
-			std::cout << "DESC\n";
-		}
+		sets = DescriptorSetManager::GetInstance().AllocBufferSets(maxFlightCount);
+		return;
+		/*auto& context = Context::GetInstance();
+		std::vector<vk::DescriptorSetLayout>layouts(maxFlightCount*2, context.shader->GetLayouts()[0]);
+
 		vk::DescriptorSetAllocateInfo allocInfo;
 		allocInfo
 			.setDescriptorPool(descPool)
-			.setDescriptorSetCount(maxFlightCount)
+			.setDescriptorSetCount(maxFlightCount*2)
 			.setSetLayouts(layouts)
 			;
-		sets = context.device.allocateDescriptorSets(allocInfo);
+		sets = context.device.allocateDescriptorSets(allocInfo);*/
 	}
 
 	void Renderer::CreateSampler()
 	{
-		vk::SamplerCreateInfo createInfo;
-		createInfo.setMagFilter(vk::Filter::eLinear)
-			.setMinFilter(vk::Filter::eLinear)
-			.setAddressModeU(vk::SamplerAddressMode::eRepeat)
-			.setAddressModeV(vk::SamplerAddressMode::eRepeat)
-			.setAddressModeW(vk::SamplerAddressMode::eRepeat)
-			.setAnisotropyEnable(false)
-			.setBorderColor(vk::BorderColor::eIntOpaqueBlack)
-			.setUnnormalizedCoordinates(false)
-			.setCompareEnable(false)
-			.setMipmapMode(vk::SamplerMipmapMode::eLinear);
-		sampler = Context::GetInstance().device.createSampler(createInfo);
+		sampler = Context::GetInstance().sampler;
 	}
 
 	void Renderer::UpdateSets()
@@ -347,7 +302,7 @@ namespace vkContext
 		for (int i =0;i<sets.size();++i)
 		{
 			auto& set = sets[i];
-			std::vector<vk::WriteDescriptorSet> writer(3);
+			std::vector<vk::WriteDescriptorSet> writer(2);
 			vk::DescriptorBufferInfo bufferInfo1;
 			bufferInfo1
 				.setBuffer(uniformBuffer->deviceBuffer->buffer)
@@ -358,7 +313,7 @@ namespace vkContext
 				.setDescriptorType(vk::DescriptorType::eUniformBuffer)
 				.setBufferInfo(bufferInfo1)
 				.setDstBinding(0)
-				.setDstSet(set)
+				.setDstSet(set.set)
 				.setDstArrayElement(0)
 				.setDescriptorCount(1)
 				;
@@ -372,12 +327,12 @@ namespace vkContext
 				.setDescriptorType(vk::DescriptorType::eUniformBuffer)
 				.setBufferInfo(bufferInfo2)
 				.setDstBinding(1)
-				.setDstSet(set)
+				.setDstSet(set.set)
 				.setDstArrayElement(0)
 				.setDescriptorCount(1)
 				;
 			// bind image
-			vk::DescriptorImageInfo imageInfo;
+			/*vk::DescriptorImageInfo imageInfo;
 			imageInfo
 				.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
 				.setImageView(texture->view)
@@ -389,13 +344,15 @@ namespace vkContext
 				.setDstArrayElement(0)
 				.setDescriptorCount(1)
 				.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-				.setDstSet(set);
+				.setDstSet(set);*/
 			context.device.updateDescriptorSets(writer, {});
 		}
+
 	}
 
 	Renderer::~Renderer()
 	{
+		delete scene;
 		texture.reset();
 		uniformBuffer.reset();
 		vertexBuffer.reset();

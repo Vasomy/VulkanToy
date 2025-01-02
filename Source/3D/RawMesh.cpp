@@ -17,6 +17,7 @@ namespace JRender
 			sizeof(Index)*inIndexCount,
 			vkContext::UBT_IndexBuffer
 		));
+		
 		vertexBuffer->SetData(verticesData);
 		indexBuffer->SetData(indicesData);
 	}

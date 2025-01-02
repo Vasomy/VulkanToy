@@ -1,5 +1,7 @@
 #include"Scene.hpp"
 #include"../Context.h"
+#include"../Tools/ModelLoader.hpp"
+#include"../QEM.h"
 namespace JRender
 {
 	const glm::vec3 cameraPos = { 0,0,1 };
@@ -24,7 +26,8 @@ namespace JRender
 
 	Scene::~Scene()
 	{
-		delete mesh;
+	
+		go.reset();
 	}
 
 	void Scene::Init()
@@ -37,7 +40,42 @@ namespace JRender
 		d_view = camera.GetView();
 		d_proj = camera.GetProj();
 
+		
+	
+		std::shared_ptr<JGameObject>goRect;
+		goRect.reset(
+			new JGameObject("Rect")
+		);
+		for (int i = 0; i < 5; ++i)
+		{
+			std::shared_ptr<RawMesh> mesh;
+			mesh.reset(new RawMesh(4, 6, rectVertices.data(), rectIndices.data()));
+			mesh->position = { i,0,0 };
+			goRect->meshes.push_back(mesh);
+		}
+		goRect->LoadTexture("asset/jay.jpg");
+		gameObjects.push_back(goRect);
+		//return;
+		auto* polyMesh = qem_simplification(1000);
+		auto vertices = polyMesh->GetVertices();
+		auto indices = polyMesh->GetIndices();
+		
+		go.reset(
+			new JGameObject("SSS")
+		);
+		std::shared_ptr<RawMesh>mesh;
+		mesh.reset(
+			new RawMesh(vertices.size(),indices.size(),vertices.data(),indices.data())
+		);
+		go->meshes.push_back(
+			mesh
+		);
 		go->LoadTexture("asset/jay.jpg");
+		gameObjects.push_back(go);
+		delete polyMesh;
+	
+
+		return;
 	}
 
 	void Scene::Tick(float dt)
@@ -54,6 +92,11 @@ namespace JRender
 			camera.MoveLeft(dt);
 		if (glfwGetKey(window, GLFW_KEY_D))
 			camera.MoveRight(dt);
+		if (glfwGetKey(window, GLFW_KEY_Z))
+			camera.MoveUp(dt);
+		if (glfwGetKey(window, GLFW_KEY_X))
+			camera.MoveDown(dt);
+
 		if (glfwGetKey(window, GLFW_KEY_Q))
 			camera.RotateCamera(-1.f, 0);
 		if (glfwGetKey(window, GLFW_KEY_E))
@@ -69,15 +112,7 @@ namespace JRender
 
 	void Scene::CreateRectMesh()
 	{
-		go = new JGameObject("AAAA");
-		mesh = new RawMesh(4, 6, rectVertices.data(), rectIndices.data());
 		
-		for (int i = 0; i < 5; ++i)
-		{
-			std::shared_ptr<RawMesh> mesh;
-			mesh.reset(new RawMesh(4, 6, rectVertices.data(), rectIndices.data()));
-			mesh->position = { i,0,0 };
-			go->meshes.push_back(mesh);
-		}
+		
 	}
 }

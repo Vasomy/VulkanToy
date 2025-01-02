@@ -40,6 +40,8 @@ namespace JRender
 		void MoveBackward(float dt);
 		void MoveLeft(float dt);
 		void MoveRight(float dt);
+		void MoveUp(float dt);
+		void MoveDown(float dt);
 	private:
 		void UpdateCameraVectors();
 

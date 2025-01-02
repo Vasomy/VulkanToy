@@ -3,6 +3,17 @@
 #include"Context.h"
 namespace vkContext
 {
+	Texture::Texture()
+	{
+		uint8_t* data = new uint8_t[4];
+		for (int i = 0; i < 4; ++i)
+		{
+			data[i] = 1.0f;
+		}
+		size_t size = 4;
+		Init(data, size,1,1);
+
+	}
 	Texture::Texture(const char* filename)
 	{
 		int w, h, channel = 0;
@@ -13,12 +24,26 @@ namespace vkContext
 		{
 			throw std::runtime_error("Image load failed!");
 		}
+		Init(data, size,w,h);
+		
+	}
 
+	Texture::~Texture()
+	{
+		auto& device = Context::GetInstance().device;
+		DescriptorSetManager::GetInstance().FreeImageSet(set);
+		device.destroyImageView(view);
+		device.freeMemory(memory);
+		device.destroyImage(image);
+	}
+
+	void Texture::Init(void* data, size_t size,int w,int h)
+	{
 		std::unique_ptr<Buffer>buffer(
 			new Buffer(
 				size,
 				vk::BufferUsageFlagBits::eTransferSrc,
-				vk::MemoryPropertyFlagBits::eHostCoherent|vk::MemoryPropertyFlagBits::eHostVisible
+				vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible
 			)
 		);
 		memcpy(buffer->map, data, size);
@@ -36,14 +61,8 @@ namespace vkContext
 
 		free(data);
 
-	}
-
-	Texture::~Texture()
-	{
-		auto& device = Context::GetInstance().device;
-		device.destroyImageView(view);
-		//device.unmapMemory(memory);
-		device.destroyImage(image);
+		set = DescriptorSetManager::GetInstance().AllocImageSet();
+		UpdateDescriptorSet();
 	}
 
 	void Texture::CreateImage(uint32_t w, uint32_t h)
@@ -165,5 +184,20 @@ namespace vkContext
 				cmdBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader,
 					{}, {}, nullptr, barrier);
 			});
+	}
+	void Texture::UpdateDescriptorSet()
+	{
+		vk::WriteDescriptorSet writer;
+		vk::DescriptorImageInfo imageInfo;
+		imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
+			.setImageView(view)
+			.setSampler(Context::GetInstance().sampler);
+		writer.setImageInfo(imageInfo)
+			.setDstBinding(0)
+			.setDstArrayElement(0)
+			.setDstSet(set.set)
+			.setDescriptorCount(1)
+			.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+		Context::GetInstance().device.updateDescriptorSets(writer, {});
 	}
 }

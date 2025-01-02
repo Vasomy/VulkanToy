@@ -43,12 +43,16 @@ elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
 endif()
 
 # ------------
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 set(VK_SDK_INCLUDE $ENV{VK_SDK_PATH}/Include)
 set(VK_SDK_LIB $ENV{VK_SDK_PATH}/Lib/vulkan-1.lib)
 set(GLFW_LIB $ENV{VK_SDK_PATH}/Lib/glfw3.lib)
 
 file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR} "include/*.h")
+file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR} "include/*.cpp")
+
+
 file(GLOB_RECURSE SOURCE_FILES ${PROJECT_SOURCE_DIR} "Source/*.cpp")
 file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR} "Source/*.h")
 
@@ -56,15 +60,43 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADER_FILES} ${SOURCE_F
 
 set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 
-add_executable (JayRender "JayRender.cpp" "JayRender.h" 
+
+
+
+add_executable (JayRender 
+"JayRender.cpp" "JayRender.h" 
+#[[
+"include/imgui-docking/imgui.h" "include/imgui-docking/imgui.cpp"
+"include/imgui-docking/imconfig.h"
+"include/imgui-docking/imgui_internal.h"
+"include/imgui-docking/imgui_widgets.cpp"
+"include/imgui-docking/imgui_tables.cpp"
+"include/imgui-docking/imstb_rectpack.h"
+"include/imgui-docking/imstb_textedit.h"
+"include/imgui-docking/imstb_truetype.h"
+"include/imgui-docking/imgui_draw.cpp"
+"include/imgui-docking/imgui_demo.cpp"
+"include/imgui-docking/backends/imgui_impl_glfw.h" "include/imgui-docking/backends/imgui_impl_glfw.cpp"
+"include/imgui-docking/backends/imgui_impl_vulkan.h" "include/imgui-docking/backends/imgui_impl_vulkan.cpp"
+]]
+
+"include/imgui-docking/imgui.cpp"
+"include/imgui-docking/imgui_demo.cpp"
+"include/imgui-docking/imgui_draw.cpp"
+"include/imgui-docking/imgui_tables.cpp"
+"include/imgui-docking/imgui_widgets.cpp"
+"include/imgui-docking/backends/imgui_impl_glfw.cpp"
+"include/imgui-docking/backends/imgui_impl_vulkan.cpp"
+
+"Source/Debug/LogInfo.hpp" "Source/Debug/LogInfo.cpp" 
 "Source/Tools/ImageLoader.hpp" "Source/Tools/ImageLoader.cpp"
 "Source/Vertex.h" "Source/Vertex.cpp"
-"Source/Context.cpp" "Source/Tools.h" 
-"Source/Debug/LogInfo.hpp" "Source/Debug/LogInfo.cpp" 
+"Source/Context.h" "Source/Context.cpp" 
 "Source/Tools/ModelLoader.hpp" "Source/Tools/ModelLoader.cpp" 
-"Source/CommandManager.hpp" "Source/CommandManager.cpp" 
+"Source/CommandManager.hpp" "Source/CommandManager.cpp"
+"Source/DescriptorManager.hpp" "Source/DescriptorManager.cpp"
 "Source/SwapChain.h" "Source/SwapChain.cpp"  
-"Source/Tools.cpp"  
+"Source/Tools.h" "Source/Tools.cpp"  
 "Source/Shader.h" "Source/Shader.cpp" 
 "Source/RenderProcess.h" "Source/RenderProcess.cpp" 
 "Source/Renderer.h" "Source/Renderer.cpp" 
@@ -76,6 +108,13 @@ add_executable (JayRender "JayRender.cpp" "JayRender.h"
 "Source/3D/RawMesh.hpp" "Source/3D/RawMesh.cpp" 
 "Source/3D/Camera.hpp" "Source/3D/Camera.cpp"
 "Source/3D/Scene.hpp" "Source/3D/Scene.cpp" 
+"Source/UiContext.hpp" "Source/UiContext.cpp"
+
+"Source/AABB_Tree/AABB_Tree.cpp" "Source/AABB_Tree/AABB_Tree.h" "Source/AABB_Tree/TinyVector.h"
+"Source/Math/Algorithms.h" "Source/Math/Massage.h" "Source/Math/MPoint3.h" "Source/Math/Mrgb.h" "Source/Math/MVector3.h"
+"Source/PolyMesh/IOManager.h" "Source/PolyMesh/IOManger.cpp" "Source/PolyMesh/MemoryPool.h" "Source/PolyMesh/PolyMesh.cpp" "Source/PolyMesh/PolyMesh.h" 
+"Source/PolyMesh/PolyMeshIterators.cpp" "Source/PolyMesh/PolyMeshIterators.h" "Source/PolyMesh/PolyMesh_Base.cpp" "Source/PolyMesh/PolyMesh_Base.h"
+"Source/QEM.h" "Source/QEM.cpp"
 )
 
 target_link_libraries(JayRender PUBLIC $ENV{VK_SDK_PATH}/Lib/glfw3.lib)

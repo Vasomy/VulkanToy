@@ -7,6 +7,7 @@ vkContext::CommandManager::CommandManager()
 
 vkContext::CommandManager::~CommandManager()
 {
+	Context::GetInstance().device.destroyCommandPool(cmdPool);
 }
 
 void vkContext::CommandManager::ResetCommandPool()
