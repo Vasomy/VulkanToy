@@ -40,6 +40,36 @@ vk::CommandBuffer vkContext::CommandManager::CreateOneCommandBuffer()
 	return CreateCommandBuffer(1)[0];
 }
 
+vk::CommandBuffer vkContext::CommandManager::BeginSingleTimeCommands()
+{
+	auto cmdBuffer = CreateOneCommandBuffer();
+
+	vk::CommandBufferBeginInfo beginInfo;
+	beginInfo.sType = vk::StructureType::eCommandBufferBeginInfo;
+	beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+	cmdBuffer.begin(&beginInfo);
+	return std::move(cmdBuffer);
+}
+
+void vkContext::CommandManager::EndSingleTimeCommands(vk::CommandBuffer cmdBuffer)
+{
+	auto device = Context::GetInstance().device;
+	auto graphicsQueue = Context::GetInstance().graphicsQueue;
+	
+	cmdBuffer.end();
+
+	vk::SubmitInfo submitInfo;
+	submitInfo.sType = vk::StructureType::eSubmitInfo;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &cmdBuffer;
+
+	graphicsQueue.submit(submitInfo);
+	graphicsQueue.waitIdle();
+
+	device.freeCommandBuffers(cmdPool, cmdBuffer);
+}
+
 void vkContext::CommandManager::ExecuteCommand(vk::Queue& queue, RecordCmdFunc func)
 {
 	auto& context = Context::GetInstance();
@@ -51,7 +81,9 @@ void vkContext::CommandManager::ExecuteCommand(vk::Queue& queue, RecordCmdFunc f
 		;
 	cmdBuffer.begin(beginInfo);
 	if (func)
+	{
 		func(cmdBuffer);
+	}
 	cmdBuffer.end();
 
 	vk::SubmitInfo submitInfo;

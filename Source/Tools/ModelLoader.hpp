@@ -40,10 +40,6 @@ namespace Tools {
             Obj
         };
 
-
-
-
-
         inline static ModelLoader* instance = nullptr;
         std::vector<std::string> m_load_content;
         float* m_load_vertices;

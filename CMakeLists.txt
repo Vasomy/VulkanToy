@@ -19,6 +19,8 @@ if (POLICY CMP0141)
 endif()
 
 
+set(CMAKE_CXX_STANDARD 17)
+
 project ("JayRender")
 
 # 将源代码添加到此项目的可执行文件。
@@ -34,13 +36,10 @@ endif()
 # 预编译着色器
 
 find_program(GLSLC_PROGRAM glslc REQUIRED)
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    execute_process(COMMAND ${GLSLC_PROGRAM} ${PROJECT_SOURCE_DIR}/Shaders/Base/vertex.vert -o ${PROJECT_SOURCE_DIR}/out/build/x64-debug/asset/vertex.spv)
-    execute_process(COMMAND ${GLSLC_PROGRAM} ${PROJECT_SOURCE_DIR}/Shaders/Base/frag.frag -o ${PROJECT_SOURCE_DIR}/out/build/x64-debug/asset/frag.spv)
-elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-    execute_process(COMMAND ${GLSLC_PROGRAM} ${PROJECT_SOURCE_DIR}/Shaders/Base/vertex.vert -o ${PROJECT_SOURCE_DIR}/out/build/x64-release/asset/vertex.spv)
-    execute_process(COMMAND ${GLSLC_PROGRAM} ${PROJECT_SOURCE_DIR}/Shaders/Base/frag.frag -o ${PROJECT_SOURCE_DIR}/out/build/x64-release/asset/frag.spv)
-endif()
+
+execute_process(COMMAND ${GLSLC_PROGRAM} ${PROJECT_SOURCE_DIR}/Shaders/Base/vertex.vert -o ${PROJECT_SOURCE_DIR}/bin/asset/vertex.spv)
+execute_process(COMMAND ${GLSLC_PROGRAM} ${PROJECT_SOURCE_DIR}/Shaders/Base/frag.frag -o ${PROJECT_SOURCE_DIR}/bin/asset/frag.spv)
+
 
 # ------------
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -64,21 +63,8 @@ set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 
 
 add_executable (JayRender 
-"JayRender.cpp" "JayRender.h" 
-#[[
-"include/imgui-docking/imgui.h" "include/imgui-docking/imgui.cpp"
-"include/imgui-docking/imconfig.h"
-"include/imgui-docking/imgui_internal.h"
-"include/imgui-docking/imgui_widgets.cpp"
-"include/imgui-docking/imgui_tables.cpp"
-"include/imgui-docking/imstb_rectpack.h"
-"include/imgui-docking/imstb_textedit.h"
-"include/imgui-docking/imstb_truetype.h"
-"include/imgui-docking/imgui_draw.cpp"
-"include/imgui-docking/imgui_demo.cpp"
-"include/imgui-docking/backends/imgui_impl_glfw.h" "include/imgui-docking/backends/imgui_impl_glfw.cpp"
-"include/imgui-docking/backends/imgui_impl_vulkan.h" "include/imgui-docking/backends/imgui_impl_vulkan.cpp"
-]]
+"JayRender.h" "JayRender.cpp"  
+
 
 "include/imgui-docking/imgui.cpp"
 "include/imgui-docking/imgui_demo.cpp"
@@ -88,10 +74,13 @@ add_executable (JayRender
 "include/imgui-docking/backends/imgui_impl_glfw.cpp"
 "include/imgui-docking/backends/imgui_impl_vulkan.cpp"
 
-"Source/Debug/LogInfo.hpp" "Source/Debug/LogInfo.cpp" 
 "Source/Tools/ImageLoader.hpp" "Source/Tools/ImageLoader.cpp"
-"Source/Vertex.h" "Source/Vertex.cpp"
-"Source/Context.h" "Source/Context.cpp" 
+"Source/RHI/VulkanHelper.hpp" "Source/RHI/VulkanHelper.cpp"
+"Source/RHI/RHIDynamic.hpp" "Source/RHI/RHIDynamic.cpp"
+"Source/RHI/RHIInterface.hpp" "Source/RHI/RHIInterface.cpp"
+
+
+
 "Source/Tools/ModelLoader.hpp" "Source/Tools/ModelLoader.cpp" 
 "Source/CommandManager.hpp" "Source/CommandManager.cpp"
 "Source/DescriptorManager.hpp" "Source/DescriptorManager.cpp"
@@ -104,21 +93,35 @@ add_executable (JayRender
 "Source/Uniform.h" "Source/Uniform.cpp" 
 "Source/Texture.hpp" "Source/Texture.cpp"
 "Source/UploadBuffer.hpp" "Source/UploadBuffer.cpp"
+"Source/RHI/Framebuffers.hpp" "Source/RHI/Framebuffers.cpp"
+
 "Source/3D/GameObject/GameObject.hpp" "Source/3D/GameObject/GameObject.cpp"
 "Source/3D/RawMesh.hpp" "Source/3D/RawMesh.cpp" 
 "Source/3D/Camera.hpp" "Source/3D/Camera.cpp"
 "Source/3D/Scene.hpp" "Source/3D/Scene.cpp" 
+
+
+"Source/Context.h" "Source/Context.cpp"
+
 "Source/UiContext.hpp" "Source/UiContext.cpp"
+
 
 "Source/AABB_Tree/AABB_Tree.cpp" "Source/AABB_Tree/AABB_Tree.h" "Source/AABB_Tree/TinyVector.h"
 "Source/Math/Algorithms.h" "Source/Math/Massage.h" "Source/Math/MPoint3.h" "Source/Math/Mrgb.h" "Source/Math/MVector3.h"
 "Source/PolyMesh/IOManager.h" "Source/PolyMesh/IOManger.cpp" "Source/PolyMesh/MemoryPool.h" "Source/PolyMesh/PolyMesh.cpp" "Source/PolyMesh/PolyMesh.h" 
 "Source/PolyMesh/PolyMeshIterators.cpp" "Source/PolyMesh/PolyMeshIterators.h" "Source/PolyMesh/PolyMesh_Base.cpp" "Source/PolyMesh/PolyMesh_Base.h"
 "Source/QEM.h" "Source/QEM.cpp"
+
+"Source/Engine.hpp" "Source/Engine.cpp"
+
 )
+
+
+
 
 target_link_libraries(JayRender PUBLIC $ENV{VK_SDK_PATH}/Lib/glfw3.lib)
 target_link_libraries(JayRender PUBLIC ${VK_SDK_LIB})
+
 
 
 target_include_directories(JayRender PUBLIC ${PROJECT_SOURCE_DIR}/include)

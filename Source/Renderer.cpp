@@ -66,16 +66,18 @@ namespace vkContext
 
 		UpdateSets();
 
+		CreateViewportFramebuffer();
+
 		scene = new JRender::Scene;
 		scene->Init();
 		scene->CreateRectMesh();
 		
 		
-
 	}
 
 	void Renderer::Render()
 	{
+		
 		static bool ishoold = false;
 		auto& device = Context::GetInstance().device;
 		auto& context = Context::GetInstance();
@@ -95,25 +97,27 @@ namespace vkContext
 	
 		//std::cout << "renderer\n";
 
-		if (context.device.waitForFences(cmdFence, true, std::numeric_limits<uint64_t>::max()) != vk::Result::eSuccess)
+		if (context.device.waitForFences(cmdFences[currentFrameIndex], true, std::numeric_limits<uint64_t>::max()) != vk::Result::eSuccess)
 		{
 			std::cout << "Wait for fence failed!\n";
 		}
 
-		context.device.resetFences(cmdFence);
-
+		context.device.resetFences(cmdFences[currentFrameIndex]);
 		auto result = device.acquireNextImageKHR(
 			context.swapchain->swapchain,
 			std::numeric_limits<uint64_t>::max(),
-			imageDrawAvaliable
+			imageDrawAvaliable[currentFrameIndex]
 		);
-		
+
 		if (result.result != vk::Result::eSuccess)
 		{
 			std::cout << "acquire next image fail!\n";
 		}
-		auto imageIndex = result.value;
-		currentFrameIndex = imageIndex;
+	
+		
+
+		auto cmdBuffer = cmdBuffers[currentFrameIndex];
+
 		cmdBuffer.reset();
 		vk::CommandBufferBeginInfo beginInfo;
 		beginInfo
@@ -134,12 +138,14 @@ namespace vkContext
 				;
 			rect
 				.setOffset({ 0,0 })
-				.setExtent(context.swapchain->info.imageExtent)
+				//.setExtent(context.swapchain->info.imageExtent)
+				.setExtent(viewportFramebuffers[currentFrameIndex]->GetExtent())
 				;
 			renderPassBeginInfo
 				.setRenderPass(context.renderProcess->renderPass)
 				.setRenderArea(rect)
-				.setFramebuffer(context.swapchain->framebuffers[imageIndex])
+				//.setFramebuffer(context.swapchain->framebuffers[currentFrameIndex])
+				.setFramebuffer(viewportFramebuffers[currentFrameIndex]->GetFramebuffer())
 				.setClearValues(clearValue)
 				;
 			//cmdBuffer.bindVertexBuffers(0, vertexBuffer->deviceBuffer->buffer,dSize);
@@ -180,24 +186,27 @@ namespace vkContext
 		std::array<vk::PipelineStageFlags, 1> waitStages = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 		submitInfo
 			.setCommandBuffers(cmdBuffer)
-			.setWaitSemaphores(imageDrawAvaliable)
-			.setSignalSemaphores(imageDrawFinish)
+			.setWaitSemaphores( imageDrawAvaliable[currentFrameIndex] )
+			.setSignalSemaphores( imageDrawFinish[currentFrameIndex] )
 			.setWaitDstStageMask(waitStages)
 			;
-		context.graphicsQueue.submit(submitInfo,cmdFence);
+		context.graphicsQueue.submit(submitInfo,cmdFences[currentFrameIndex]);
 
-		
+		//device.waitIdle();
 
 		vk::PresentInfoKHR presentInfoKHR;
 		presentInfoKHR
-			.setImageIndices(imageIndex)
+			.setImageIndices(currentFrameIndex)
 			.setSwapchains(context.swapchain->swapchain)
-			.setWaitSemaphores(imageDrawFinish)
+			.setWaitSemaphores(imageDrawFinish[currentFrameIndex])
 			;
 		if (context.presentQueue.presentKHR(presentInfoKHR) != vk::Result::eSuccess)
 		{
 			std::cout << "Image present failed!\n";
 		}
+
+		currentFrameIndex = currentFrameIndex + 1;
+		currentFrameIndex %= 2;
 	}
 
 	void Renderer::PresentFrame()
@@ -211,8 +220,10 @@ namespace vkContext
 
 	void Renderer::AllocCommandBuffer()
 	{
-
-		cmdBuffer = Context::GetInstance().commandManager->CreateOneCommandBuffer();
+		cmdBuffers.resize(2);
+		for (int i = 0; i < 2; ++i) {
+			cmdBuffers[i] = Context::GetInstance().commandManager->CreateOneCommandBuffer();
+		}
 	}
 
 	void Renderer::CreateFence()
@@ -221,19 +232,38 @@ namespace vkContext
 		createInfo
 			.setFlags(vk::FenceCreateFlagBits::eSignaled)
 			;
-		cmdFence = Context::GetInstance().device.createFence(createInfo);
+		cmdFences.resize(2);
+		for (int i = 0; i < cmdFences.size(); ++i) 
+		{
+			cmdFences[i] = Context::GetInstance().device.createFence(createInfo);
+		}
 	}
 
 	void Renderer::CreateSems()
 	{
+		imageDrawAvaliable.resize(2);
+		imageDrawFinish.resize(2);
 		auto& device = Context::GetInstance().device;
 		vk::SemaphoreCreateInfo createInfo;
-		imageDrawAvaliable = device.createSemaphore(createInfo);
-		imageDrawFinish = device.createSemaphore(createInfo);
+		for (int i = 0; i < 2; ++i) {
+			imageDrawAvaliable[i] = device.createSemaphore(createInfo);
+			imageDrawFinish[i] = device.createSemaphore(createInfo);
+		}
 	}
 
 
 
+
+	void Renderer::CreateViewportFramebuffer()
+	{
+		viewportFramebuffers.resize(2);
+		auto& context = Context::GetInstance();
+		for (int i = 0; i < viewportFramebuffers.size(); ++i)
+		{
+			auto& framebuffer = viewportFramebuffers[i];
+			framebuffer.reset(new Framebuffers(1920, 1080, context.renderProcess->renderPass));
+		}
+	}
 
 	void Renderer::CreateUniformBuffer()
 	{
@@ -257,38 +287,13 @@ namespace vkContext
 	{
 		DescriptorSetManager::Init(maxFlightCount);
 		return;
-		//descPool = DescriptorSetManager::GetInstance().AllocBufferSets(maxFlightCount);
-
-		auto& device = Context::GetInstance().device;
-		vk::DescriptorPoolCreateInfo createInfo;
-		std::vector<vk::DescriptorPoolSize> poolSize(1);
-		poolSize[0]
-			.setType(vk::DescriptorType::eUniformBuffer)
-			.setDescriptorCount(maxFlightCount * 2)
-			;
-	
-		createInfo
-			.setMaxSets(maxFlightCount)
-			.setPoolSizes(poolSize)
-
-			;
-		descPool = device.createDescriptorPool(createInfo);
+		
 	}
 
 	void Renderer::AllocateSets()
 	{
 		sets = DescriptorSetManager::GetInstance().AllocBufferSets(maxFlightCount);
 		return;
-		/*auto& context = Context::GetInstance();
-		std::vector<vk::DescriptorSetLayout>layouts(maxFlightCount*2, context.shader->GetLayouts()[0]);
-
-		vk::DescriptorSetAllocateInfo allocInfo;
-		allocInfo
-			.setDescriptorPool(descPool)
-			.setDescriptorSetCount(maxFlightCount*2)
-			.setSetLayouts(layouts)
-			;
-		sets = context.device.allocateDescriptorSets(allocInfo);*/
 	}
 
 	void Renderer::CreateSampler()
@@ -360,10 +365,12 @@ namespace vkContext
 		auto& device = Context::GetInstance().device;
 		//device.freeDescriptorSets(descPool,sets); // descSets会在销毁descPool再销毁一次
 		device.destroyDescriptorPool(descPool);
-		device.destroySemaphore(imageDrawAvaliable);
-		device.destroySemaphore(imageDrawFinish);
-		context.commandManager->FreeCommandBuffer(cmdBuffer);
+		for (int i = 0; i < 2; ++i) {
+			device.destroySemaphore(imageDrawAvaliable[i]);
+			device.destroySemaphore(imageDrawFinish[i]);
+			context.commandManager->FreeCommandBuffer(cmdBuffers[i]);
+			device.destroyFence(cmdFences[i]);
+		}
 		//device.freeCommandBuffers(cmdPool, cmdBuffer);
-		device.destroyFence(cmdFence);
 	}
 }

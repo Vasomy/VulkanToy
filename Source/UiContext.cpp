@@ -149,19 +149,9 @@ namespace vkContext {
 		auto currentFrameIndex = Context::GetInstance().renderer->currentFrameIndex;
 		if (ImGui::Begin("ViewPort"))
 		{
-			/*vk::DescriptorSetLayout set;
-			vk::DescriptorSetLayoutCreateInfo ci;
-			vk::DescriptorSetLayoutBinding dsb;
-			dsb
-				.setBinding(0)
-				.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-				.setDescriptorCount(1)
-				.setStageFlags(vk::ShaderStageFlagBits::eFragment)
-				;
-			ci.setBindings(dsb);
-			set = device.createDescriptorSetLayout(ci);*/
+			
 			auto id = ImGui_ImplVulkan_AddTexture(Context::GetInstance().sampler,
-				swapchain->imageViews[currentFrameIndex], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+				context.renderer->viewportFramebuffers[0]->GetView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			ImGui::Image((ImTextureID)id, { 600,400 });
 		}
 		ImGui::End();

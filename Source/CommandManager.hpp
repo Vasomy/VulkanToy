@@ -16,6 +16,9 @@ namespace vkContext
 		std::vector<vk::CommandBuffer> CreateCommandBuffer(uint32_t count);
 		vk::CommandBuffer CreateOneCommandBuffer();
 
+		vk::CommandBuffer BeginSingleTimeCommands();
+		void EndSingleTimeCommands(vk::CommandBuffer cmdBuffer);
+
 		using RecordCmdFunc = std::function<void(vk::CommandBuffer&)>;
 		void ExecuteCommand(vk::Queue&, RecordCmdFunc);
 

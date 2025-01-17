@@ -212,7 +212,8 @@ namespace vkContext
 
 	Context::~Context()
 	{
-		vkDestroySurfaceKHR(instance, surface,nullptr);
+		// surface在 uicontext 退出时就销毁了	
+		//vkDestroySurfaceKHR(instance, surface,nullptr);
 		device.destroySampler(sampler);
 		device.destroy();
 		instance.destroy();

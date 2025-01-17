@@ -72,6 +72,7 @@ namespace vkContext
 
 		auto presents = phyDevice.getSurfacePresentModesKHR(surface);
 		info.presentMod = presents[0];
+		
 		for (auto present : presents)
 		{
 			if (present == vk::PresentModeKHR::eMailbox)
@@ -131,6 +132,10 @@ namespace vkContext
 			framebuffers[i] = Context::GetInstance().device.createFramebuffer(createInfo);
 	
 		}
+	}
+
+	void Swapchain::PrepareSwapchain()
+	{
 	}
 
 	Swapchain::~Swapchain()

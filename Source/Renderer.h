@@ -7,6 +7,8 @@
 #include"3D/Scene.hpp"
 #include"Texture.hpp"
 #include"DescriptorManager.hpp"
+
+#include"RHI/Framebuffers.hpp"
 namespace vkContext {
 	class Renderer
 	{
@@ -19,19 +21,19 @@ namespace vkContext {
 		void PresentFrame();
 		vk::CommandPool cmdPool;
 		vk::Sampler sampler;
-		int32_t currentFrameIndex;
+		uint32_t currentFrameIndex;
 
+		std::vector<std::unique_ptr<Framebuffers>> viewportFramebuffers;
 	private:
 		void InitCommandPool();
 		void AllocCommandBuffer();
 		void CreateFence(); 
 		void CreateSems();
-		vk::CommandBuffer cmdBuffer;
+		std::vector<vk::CommandBuffer> cmdBuffers;
+		std::vector<vk::Fence> cmdFences;
+		std::vector<vk::Semaphore> imageDrawFinish;
+		std::vector<vk::Semaphore> imageDrawAvaliable;
 
-		vk::Fence cmdFence;
-
-		vk::Semaphore imageDrawFinish;
-		vk::Semaphore imageDrawAvaliable;
 
 		std::unique_ptr<UploadBuffer> vertexBuffer;
 		std::unique_ptr<UploadBuffer> indexBuffer;
@@ -45,8 +47,10 @@ namespace vkContext {
 		std::vector<DescriptorSetManager::SetInfo>sets;
 		std::vector<vk::DescriptorSet>imgSets;
 
+		//std::vector<vk::Framebuffer> viewportFramebuffer;
 
-		
+
+		void CreateViewportFramebuffer();
 
 		void CreateUniformBuffer();
 		void BufferUniformData();

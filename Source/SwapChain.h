@@ -25,6 +25,8 @@ namespace vkContext {
 		void CreateImageViews();
 		void CreateFramebuffers();
 
+		void PrepareSwapchain();
+
 		int width;
 		int height;
 		SwapchainInfo info;
@@ -32,7 +34,7 @@ namespace vkContext {
 		std::vector<vk::ImageView>imageViews;
 		std::vector<vk::Framebuffer>framebuffers;
 
-
+		int currentIndex = 0;
 		
 	};
 }
